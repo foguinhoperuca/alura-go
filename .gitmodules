@@ -1,0 +1,6 @@
+[submodule "upstream/course_go_01"]
+	path = upstream/course_go_01
+	url = https://github.com/alura-cursos/curso-go-1.git
+[submodule "upstream/extra_content_assets"]
+	path = upstream/extra_content_assets
+	url = git@github.com:alura-cursos/material-extra-django5.git
