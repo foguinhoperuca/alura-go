@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+
 	"github.com/gin-gonic/gin"
+
 	"pizzeria/models"
 )
 
@@ -20,11 +22,6 @@ func main() {
 	loadPizzas()
 
 	router := gin.Default()
-	router.GET("/ping", func(c *gin.Context) {
-		c.JSON(200, gin.H {
-			"message": "pong",
-		})
-	})
 	router.GET("fixed_pizzas", func(c *gin.Context) {
 		c.JSON(200, gin.H {
 			"pizza01": "[ANON FUNC] TODO Get struct Tuscany",
@@ -32,9 +29,11 @@ func main() {
 			"pizza03": "[ANON FUNC] TODO Get struct Tuna with cheese",
 		})
 	})
-	router.GET("pizzas",    getPizzas)
-	router.POST("pizzas",   postPizzas)
-	router.GET("pizza/:id", getPizzaByID)
+	router.GET("pizzas",        getPizzas)
+	router.POST("pizzas",       postPizza)
+	router.GET("pizzas/:id",    getPizzaByID)
+	router.DELETE("pizzas/:id", deletePizzaByID)
+	router.PUT("pizzas/:id",    updatePizzaByID)
 	router.Run()
 }
 
@@ -44,7 +43,7 @@ func getPizzas(c *gin.Context) {
 	})
 }
 
-func postPizzas(c *gin.Context) {
+func postPizza(c *gin.Context) {
 	var newPizza models.Pizza
 	if err := c.ShouldBindJSON(&newPizza); err != nil {
 		c.JSON(400, gin.H {
@@ -113,6 +112,66 @@ func savePizza() {
 		fmt.Println("Error *encoding* JSON", err)
 	}
 	
+}
+
+func deletePizzaByID(c *gin.Context) {
+	idParam := c.Param("id")
+	id, err := strconv.Atoi(idParam)
+	if err != nil {
+		error_message := fmt.Sprintf("[ERROR] %s", err.Error())
+		c.JSON(400, gin.H {
+			"message": error_message,
+		})
+		return
+	}
+
+	for i, p := range pizzas {
+		if p.ID == id {
+			pizzas = append(pizzas[:i], pizzas[i+1:]...)
+			savePizza()
+			message := fmt.Sprintf("Pizza %d was deleted", id)
+			c.JSON(200, gin.H {
+				"message": message,
+			})
+			return
+		}
+	}
+	c.JSON(404, gin.H {"message": "Pizza *NOT* found!!"})
+}
+
+func updatePizzaByID(c *gin.Context) {
+	var updatedPizza models.Pizza
+	idParam := c.Param("id")
+	id, err := strconv.Atoi(idParam)
+	if err != nil {
+		error_message := fmt.Sprintf("[ERROR] %s", err.Error())
+		c.JSON(400, gin.H {
+			"message": error_message,
+		})
+		return
+	}
+
+	if err := c.ShouldBindJSON(&updatedPizza); err != nil {
+		c.JSON(400, gin.H{"erro": err.Error()})
+		return
+	}
+
+	for i, p:= range pizzas {
+		if p.ID == id {
+			pizzas[i] = updatedPizza
+			savePizza()
+			message := fmt.Sprintf("Pizza # %d was updated", id)
+			c.JSON(200, gin.H {
+				"message": message,
+				"savedPizza": pizzas[i],
+			})
+			return
+		}
+	}
+
+	c.JSON(404, gin.H {
+		"method": "pizza not found!",
+	})
 }
 
 func helloWorld() {

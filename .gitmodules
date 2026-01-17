@@ -4,3 +4,6 @@
 [submodule "upstream/extra_content_assets"]
 	path = upstream/extra_content_assets
 	url = git@github.com:alura-cursos/material-extra-django5.git
+[submodule "upstream/course_go_02"]
+	path = upstream/course_go_02
+	url = git@github.com:alura-cursos/curso-go-2.git

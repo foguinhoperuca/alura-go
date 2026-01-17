@@ -11,18 +11,37 @@ run:
 	@date
 
 TEST_URL ?= "http://localhost:8080/pizzas"
-test-get-pizzas:
+get-pizzas:
 	@clear
 	@date
 	curl $(TEST_URL) | jq
 
+FLAVOR ?= quatrino
 test-post-pizza:
 	@clear
 	@date
-	curl -X POST -d @tests/post_pizza.json $(TEST_URL) | jq # pass -i to curl to see headers
+	curl -X POST -d @tests/$(FLAVOR).json $(TEST_URL) | jq # pass -i to curl to see headers
 
-PIZZA_ID ?= 1
-test-get-pizza:
+post-pizzas:
 	@clear
 	@date
-	curl "http://localhost:8080/pizza/$(PIZZA_ID)" | jq
+	curl -X POST -d @tests/margherita.json $(TEST_URL) | jq # pass -i to curl to see headers
+	curl -X POST -d @tests/quatrino.json $(TEST_URL) | jq # pass -i to curl to see headers
+	curl -X POST -d @tests/tuna_with_cheese.json $(TEST_URL) | jq # pass -i to curl to see headers
+	curl -X POST -d @tests/tuscany.json $(TEST_URL) | jq # pass -i to curl to see headers
+
+PIZZA_ID ?= 1
+get-pizza:
+	@clear
+	@date
+	curl "$(TEST_URL)/$(PIZZA_ID)" | jq
+
+delete-pizza:
+	@clear
+	@date
+	curl -X DELETE "$(TEST_URL)/$(PIZZA_ID)" | jq
+
+update-pizza:
+	@clear
+	@date
+	curl -X PUT -d @tests/update.json "$(TEST_URL)/$(PIZZA_ID)"
