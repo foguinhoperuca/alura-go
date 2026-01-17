@@ -7,7 +7,7 @@ build:
 run:
 	@clear
 	@date
-	go run .
+	go run cmd/main.go
 	@date
 
 TEST_URL ?= "http://localhost:8080/pizzas"

@@ -12,3 +12,4 @@
 
 ### [Course 02](https://cursos.alura.com.br/course/go-gerenciando-otimizando-api) ###
 
+- [Main git repository for course 02](git@github.com:alura-cursos/curso-go-2.git )
