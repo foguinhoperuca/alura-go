@@ -34,7 +34,7 @@ PIZZA_ID ?= 1
 get-pizza:
 	@clear
 	@date
-	curl "$(TEST_URL)/$(PIZZA_ID)" | jq
+	curl "$(TEST_URL)/$(PIZZA_ID)"
 
 delete-pizza:
 	@clear
@@ -45,3 +45,8 @@ update-pizza:
 	@clear
 	@date
 	curl -X PUT -d @tests/update.json "$(TEST_URL)/$(PIZZA_ID)"
+
+negative-price:
+	@clear
+	@date
+	curl -i -X POST -d @tests/negative_pizza.json $(TEST_URL)

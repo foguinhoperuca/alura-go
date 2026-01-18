@@ -3,15 +3,17 @@ package handler
 import (
 	"fmt"
 	"strconv"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 
 	"pizzeria/internal/data"
 	"pizzeria/internal/models"
+	"pizzeria/internal/service"
 )
 
 func GetPizzas(c *gin.Context) {
-	c.JSON(200, gin.H {
+	c.JSON(http.StatusCreated, gin.H {
 		"pizzas": data.Pizzas,
 	})
 }
@@ -19,15 +21,24 @@ func GetPizzas(c *gin.Context) {
 func PostPizza(c *gin.Context) {
 	var newPizza models.Pizza
 	if err := c.ShouldBindJSON(&newPizza); err != nil {
-		c.JSON(400, gin.H {
+		c.JSON(http.StatusBadRequest, gin.H {
 			"error": err.Error(),
 		})
 		return 
 	}
+
+	if err := service.ValidatePizzaPrice(&newPizza); err != nil {
+		c.JSON(http.StatusMethodNotAllowed, gin.H {
+			"error": err.Error(),
+		})
+
+		return
+	}
+	
 	newPizza.ID = len(data.Pizzas) + 1
 	data.Pizzas = append(data.Pizzas, newPizza)
 	data.SavePizza()
-	c.JSON(201, newPizza)
+	c.JSON(http.StatusCreated, newPizza)
 }
 
 func GetPizzaByID(c *gin.Context) {
@@ -37,7 +48,7 @@ func GetPizzaByID(c *gin.Context) {
 	id, err := strconv.Atoi(idParam)
 	if err != nil {
 		error_message := fmt.Sprintf("[ERROR] %s", err.Error())
-		c.JSON(400, gin.H {
+		c.JSON(http.StatusBadRequest, gin.H {
 			"message": error_message,
 		})
 		return
@@ -45,7 +56,7 @@ func GetPizzaByID(c *gin.Context) {
 
 	for _, p := range data.Pizzas {
 		if p.ID == id {
-			c.JSON(200, gin.H {
+			c.JSON(http.StatusOK, gin.H {
 				"found": id,
 				"pizza": p,
 			})
@@ -53,7 +64,7 @@ func GetPizzaByID(c *gin.Context) {
 		}
 	}
 	error_message := fmt.Sprintf("ID %d not found!", id)				// FIXME doing python in go?!
-	c.JSON(404, gin.H {
+	c.JSON(http.StatusNotFound, gin.H {
 		"message": error_message,
 	})
 
@@ -64,7 +75,7 @@ func DeletePizzaByID(c *gin.Context) {
 	id, err := strconv.Atoi(idParam)
 	if err != nil {
 		error_message := fmt.Sprintf("[ERROR] %s", err.Error())
-		c.JSON(400, gin.H {
+		c.JSON(http.StatusBadRequest, gin.H {
 			"message": error_message,
 		})
 		return
@@ -75,7 +86,7 @@ func DeletePizzaByID(c *gin.Context) {
 			data.Pizzas = append(data.Pizzas[:i], data.Pizzas[i+1:]...)
 			data.SavePizza()
 			message := fmt.Sprintf("Pizza %d was deleted", id)
-			c.JSON(200, gin.H {
+			c.JSON(http.StatusOK, gin.H {
 				"message": message,
 			})
 			return
@@ -90,14 +101,22 @@ func UpdatePizzaByID(c *gin.Context) {
 	id, err := strconv.Atoi(idParam)
 	if err != nil {
 		error_message := fmt.Sprintf("[ERROR] %s", err.Error())
-		c.JSON(400, gin.H {
+		c.JSON(http.StatusBadRequest, gin.H {
 			"message": error_message,
 		})
 		return
 	}
 
 	if err := c.ShouldBindJSON(&updatedPizza); err != nil {
-		c.JSON(400, gin.H{"erro": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"erro": err.Error()})
+		return
+	}
+
+	if err := service.ValidatePizzaPrice(&updatedPizza); err != nil {
+		c.JSON(http.StatusMethodNotAllowed, gin.H {
+			"error": err.Error(),
+		})
+
 		return
 	}
 
@@ -106,7 +125,7 @@ func UpdatePizzaByID(c *gin.Context) {
 			data.Pizzas[i] = updatedPizza
 			data.SavePizza()
 			message := fmt.Sprintf("Pizza # %d was updated", id)
-			c.JSON(200, gin.H {
+			c.JSON(http.StatusOK, gin.H {
 				"message": message,
 				"savedPizza": data.Pizzas[i],
 			})
@@ -114,7 +133,7 @@ func UpdatePizzaByID(c *gin.Context) {
 		}
 	}
 
-	c.JSON(404, gin.H {
+	c.JSON(http.StatusNotFound, gin.H {
 		"method": "pizza not found!",
 	})
 }
