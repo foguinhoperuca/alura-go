@@ -28,11 +28,17 @@ func main() {
 			"pizza03": "[ANON FUNC] TODO Get struct Tuna with cheese",
 		})
 	})
+
 	router.GET("pizzas",        handler.GetPizzas)
 	router.POST("pizzas",       handler.PostPizza)
 	router.GET("pizzas/:id",    handler.GetPizzaByID)
 	router.DELETE("pizzas/:id", handler.DeletePizzaByID)
 	router.PUT("pizzas/:id",    handler.UpdatePizzaByID)
+
+	router.POST("pizzas/:id/reviews", handler.PostReview)
+
+	router.POST("people", handler.PostPerson)
+	
 	router.Run(":8080")
 }
 

@@ -49,4 +49,13 @@ update-pizza:
 negative-price:
 	@clear
 	@date
-	curl -i -X POST -d @tests/negative_pizza.json $(TEST_URL)
+	curl -i -X POST -d @tests/negative_pizza.json "$(TEST_URL)"
+
+post-review:
+	@clear
+	@date
+	curl -s -X POST -d @tests/review.json "$(TEST_URL)/$(PIZZA_ID)/reviews"
+	@echo ""
+	@echo "-----------------"
+	@echo ""
+	curl -s -X POST -d @tests/review_error.json "$(TEST_URL)/$(PIZZA_ID)/reviews"
